@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 # <HINT> Import any new Models here
-from .models import Course, Enrollment
+from .models import Course, Enrollment,  Question, Choice, Submission
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -132,5 +132,37 @@ def extract_answers(request):
         # Calculate the total score
 #def show_exam_result(request, course_id, submission_id):
 
+def submit(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    user = request.user
+    enrollment = Enrollment.objects.get(user=user, course=course)
+    submission = Submission.objects.create(enrollment=enrollment)
+    choices = extract_answers(request)
+    submission.choices.set(choices)
+    submission_id = submission.id
+    return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(course_id, submission_id,)))
 
+	
+def show_exam_result(request, PARAM1, PARAM2):
+		context = {}
+		course = get_object_or_404(MODEL1, pk=PARAM1)
+		submission = MODEL2.objects.get(id=PARAM2)
+		choices = submission.choices.all()
+
+		total_score = 0
+		questions = course.RELATION_SET.all()  # Assuming course has related questions
+
+		for question in questions:
+			correct_choices = question.RELATION_SET.filter(ARGUMENT1=True)  # Get all correct choices for the question
+			selected_choices = choices.filter(ARGUMENT2=question)  # Get the user's selected choices for the question
+
+			# Check if the selected choices are the same as the correct choices
+			if set(ARGUMENT3) == set(ARGUMENT4):
+				total_score += question.ATTRIBUTE  # Add the question's grade only if all correct answers are selected
+
+		context['KEY1'] = course
+		context['KEY2'] = total_score
+		context['KEY3'] = choices
+
+		return render(request, 'TEMPLATE_PATH', context)
 
